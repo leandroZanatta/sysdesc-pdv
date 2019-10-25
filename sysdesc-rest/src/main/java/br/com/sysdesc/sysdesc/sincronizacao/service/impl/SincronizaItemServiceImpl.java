@@ -7,40 +7,39 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-import br.com.sysdesc.sysdesc.dto.SincronizacaoItemDTO;
-import br.com.sysdesc.sysdesc.dto.SincronizacaoVersaoDTO;
+import br.com.sysdesc.dto.sincronizacao.SincronizacaoItemDTO;
+import br.com.sysdesc.dto.sincronizacao.SincronizacaoVersaoDTO;
 import br.com.sysdesc.sysdesc.sincronizacao.service.SincronizacaoItemService;
 import br.com.sysdesc.sysdesc.sincronizacao.tabelas.vo.ComparaVersaoTabelaVO;
 
 @Service
 public abstract class SincronizaItemServiceImpl<T extends SincronizacaoVersaoDTO> implements SincronizacaoItemService {
 
-	private ComparaVersaoTabelaVO comparaVersaoTabelaVO;
+    private ComparaVersaoTabelaVO comparaVersaoTabelaVO;
 
-	@Autowired
-	@Lazy
-	private ApplicationContext applicationContext;
+    @Autowired
+    @Lazy
+    private ApplicationContext applicationContext;
 
-	@Override
-	public void setSincronizacaoVersao(ComparaVersaoTabelaVO comparaVersaoTabelaVO) {
-		this.comparaVersaoTabelaVO = comparaVersaoTabelaVO;
-	}
+    @Override
+    public void setSincronizacaoVersao(ComparaVersaoTabelaVO comparaVersaoTabelaVO) {
+        this.comparaVersaoTabelaVO = comparaVersaoTabelaVO;
+    }
 
-	@Override
-	public boolean isTabelaAtualizada() {
+    @Override
+    public boolean isTabelaAtualizada() {
 
-		for (SincronizacaoItemDTO versao : comparaVersaoTabelaVO.getVersaoRemota()) {
+        for (SincronizacaoItemDTO versao : comparaVersaoTabelaVO.getVersaoRemota()) {
 
-			Optional<SincronizacaoItemDTO> optional = comparaVersaoTabelaVO.getVersaoLocal().stream().findFirst();
+            Optional<SincronizacaoItemDTO> optional = comparaVersaoTabelaVO.getVersaoLocal().stream().findFirst();
 
-			if (!optional.isPresent()
-					|| optional.get().getSincronizacaoVersao().equals(versao.getSincronizacaoVersao())) {
-				return Boolean.FALSE;
-			}
-		}
+            if (!optional.isPresent() || optional.get().getSincronizacaoVersao().equals(versao.getSincronizacaoVersao())) {
+                return Boolean.FALSE;
+            }
+        }
 
-		return Boolean.TRUE;
+        return Boolean.TRUE;
 
-	}
+    }
 
 }

@@ -14,43 +14,69 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
+import br.com.sysdesc.dto.sincronizacao.SincronizacaoItemDTO;
+import br.com.sysdesc.sysdesc.sincronizacao.intercomm.RequestBuilder;
+import br.com.sysdesc.sysdesc.sincronizacao.intercomm.client.SincronizacaoTabelasClient;
 import br.com.sysdesc.sysdesc.sincronizacao.service.SincronizacaoInformacoesService;
 import br.com.sysdesc.sysdesc.sincronizacao.service.SincronizacaoItemService;
+import br.com.sysdesc.sysdesc.sincronizacao.tabelas.vo.ComparaVersaoTabelaVO;
 
 @Service("sincronizacaoTabelas")
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class SincronizaInformacoesTabelasPDVServiceImpl implements SincronizacaoInformacoesService {
 
-	@Autowired
-	@Lazy
-	private ApplicationContext applicationContext;
+    @Autowired
+    @Lazy
+    private ApplicationContext applicationContext;
 
-	@Override
-	public Boolean sincronizar() throws Exception {
+    @Override
+    public Boolean sincronizar() throws Exception {
 
-		Collection<SincronizacaoItemService> mapaSincronizacoes = applicationContext
-				.getBeansOfType(SincronizacaoItemService.class).values();
+        Collection<SincronizacaoItemService> mapaSincronizacoes = applicationContext.getBeansOfType(SincronizacaoItemService.class).values();
 
-		AsyncResult<List<Future<Boolean>>> threads = this.sincronizarTabelas(mapaSincronizacoes);
+        this.buscarEAdicionarVersaoTabelas(mapaSincronizacoes);
 
-		return Boolean.TRUE;
-	}
+        AsyncResult<List<Future<Boolean>>> threads = this.sincronizarTabelas(mapaSincronizacoes);
 
-	private AsyncResult<List<Future<Boolean>>> sincronizarTabelas(
-			Collection<SincronizacaoItemService> sincronizacaoItems) throws InterruptedException {
+        return Boolean.TRUE;
+    }
 
-		List<Future<Boolean>> listaFutures = new ArrayList<>();
+    private void buscarEAdicionarVersaoTabelas(Collection<SincronizacaoItemService> mapaSincronizacoes) {
 
-		sincronizacaoItems.forEach(sincronizacao -> {
-			listaFutures.add(executarSincronizacaoTabela(sincronizacao));
-		});
+        List<ComparaVersaoTabelaVO> versaoTabelas = this.buscarVersaoTabelas();
 
-		return new AsyncResult<List<Future<Boolean>>>(listaFutures);
-	}
+        this.adicionarVersaoTabelas(mapaSincronizacoes, versaoTabelas);
+    }
 
-	@Async("executorSincronizacaoGrupoTabelas")
-	private Future<Boolean> executarSincronizacaoTabela(SincronizacaoItemService sincronizacao) {
-		return null;
-	}
+    private void adicionarVersaoTabelas(Collection<SincronizacaoItemService> mapaSincronizacoes, List<ComparaVersaoTabelaVO> versaoTabelas) {
+
+    }
+
+    private List<ComparaVersaoTabelaVO> buscarVersaoTabelas() {
+
+        List<SincronizacaoItemDTO> versoesRemotas = RequestBuilder.build().target(SincronizacaoTabelasClient.class, "").buscarVersoesSincronizacao();
+
+        List<SincronizacaoItemDTO> versoesLocais = null;
+
+        return null;
+    }
+
+    private AsyncResult<List<Future<Boolean>>> sincronizarTabelas(Collection<SincronizacaoItemService> sincronizacaoItems)
+            throws InterruptedException {
+
+        List<Future<Boolean>> listaFutures = new ArrayList<>();
+
+        sincronizacaoItems.forEach(sincronizacao -> {
+            listaFutures.add(executarSincronizacaoTabela(sincronizacao));
+        });
+
+        return new AsyncResult<>(listaFutures);
+    }
+
+    @Async("executorSincronizacaoGrupoTabelas")
+    private Future<Boolean> executarSincronizacaoTabela(SincronizacaoItemService sincronizacao) {
+
+        return null;
+    }
 
 }

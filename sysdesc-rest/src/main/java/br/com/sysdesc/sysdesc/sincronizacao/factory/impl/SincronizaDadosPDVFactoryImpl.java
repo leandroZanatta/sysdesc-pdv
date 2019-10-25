@@ -24,36 +24,35 @@ import lombok.extern.slf4j.Slf4j;
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class SincronizaDadosPDVFactoryImpl implements SincronizaDadosPDVFactory {
 
-	@Autowired
-	@Lazy
-	@Qualifier(value = "sincronizacaoTabelas")
-	private SincronizacaoInformacoesService sincronizaInformacoesTabelasPDVService;
+    @Autowired
+    @Lazy
+    @Qualifier(value = "sincronizacaoTabelas")
+    private SincronizacaoInformacoesService sincronizaInformacoesTabelasPDVService;
 
-	private Map<TipoSincronizacaoEnum, Future<Boolean>> processamentos = new HashMap<>();
+    private Map<TipoSincronizacaoEnum, Future<Boolean>> processamentos = new HashMap<>();
 
-	@Override
-	public void sincronizarDados() {
+    @Override
+    public void sincronizarDados() {
 
-		runThread(TipoSincronizacaoEnum.TABELAS, sincronizaInformacoesTabelasPDVService);
-	}
+        runThread(TipoSincronizacaoEnum.TABELAS, sincronizaInformacoesTabelasPDVService);
+    }
 
-	@Async("singleTaskExecutor")
-	public void runThread(TipoSincronizacaoEnum tipoSincronizacao,
-			SincronizacaoInformacoesService sincronizacaoInformacoes) {
+    @Async("singleTaskExecutor")
+    public void runThread(TipoSincronizacaoEnum tipoSincronizacao, SincronizacaoInformacoesService sincronizacaoInformacoes) {
 
-		Future<Boolean> future = processamentos.get(tipoSincronizacao);
+        Future<Boolean> future = processamentos.get(tipoSincronizacao);
 
-		if (future == null || future.isDone()) {
+        if (future == null || future.isDone()) {
 
-			try {
+            try {
 
-				processamentos.put(tipoSincronizacao, new AsyncResult<Boolean>(sincronizacaoInformacoes.sincronizar()));
+                processamentos.put(tipoSincronizacao, new AsyncResult<Boolean>(sincronizacaoInformacoes.sincronizar()));
 
-			} catch (Exception e) {
+            } catch (Exception e) {
 
-				log.error(SysdescRestConstants.ERRO_INICIANDO_SINCRONIZACAO, e);
-			}
-		}
-	}
+                log.error(SysdescRestConstants.ERRO_INICIANDO_SINCRONIZACAO, e);
+            }
+        }
+    }
 
 }
